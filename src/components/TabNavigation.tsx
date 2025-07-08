@@ -1,8 +1,8 @@
 'use client';
 
-import { Upload, Image, Search } from 'lucide-react';
+import { Upload, Image, Search, Folder } from 'lucide-react';
 
-export type TabType = 'upload' | 'library' | 'search';
+export type TabType = 'upload' | 'library' | 'search' | 'album';
 
 interface TabNavigationProps {
   activeTab: TabType;
@@ -25,6 +25,11 @@ export default function TabNavigation({ activeTab, onTabChange }: TabNavigationP
       id: 'search' as TabType,
       label: '検索',
       icon: Search,
+    },
+    {
+      id: 'album' as TabType,
+      label: 'アルバム',
+      icon: Folder,
     },
   ];
 

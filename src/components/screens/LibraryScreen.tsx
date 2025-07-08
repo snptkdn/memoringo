@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckSquare, Square, Trash2, X, CheckCheck } from 'lucide-react';
+import { CheckSquare, Square, Trash2, X, CheckCheck, FolderPlus } from 'lucide-react';
 import MediaGrid from '../MediaGrid';
 
 interface LibraryScreenProps {
@@ -14,6 +14,8 @@ export default function LibraryScreen({ refreshTrigger, onRefresh }: LibraryScre
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [availableItems, setAvailableItems] = useState<string[]>([]);
+  const [showAddToAlbum, setShowAddToAlbum] = useState(false);
+  const [albums, setAlbums] = useState<any[]>([]);
 
   const handleSelectionChange = (selectedIds: string[]) => {
     setSelectedItems(selectedIds);
@@ -35,6 +37,49 @@ export default function LibraryScreen({ refreshTrigger, onRefresh }: LibraryScre
 
   const handleItemsLoaded = (itemIds: string[]) => {
     setAvailableItems(itemIds);
+  };
+
+  const fetchAlbums = async () => {
+    try {
+      const response = await fetch('/api/albums');
+      if (response.ok) {
+        const data = await response.json();
+        setAlbums(data);
+      }
+    } catch (error) {
+      console.error('アルバム取得エラー:', error);
+    }
+  };
+
+  const handleAddToAlbum = () => {
+    if (selectedItems.length === 0) return;
+    fetchAlbums();
+    setShowAddToAlbum(true);
+  };
+
+  const addToAlbum = async (albumId: string) => {
+    try {
+      const response = await fetch(`/api/albums/${albumId}/add-media`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ mediaIds: selectedItems }),
+      });
+
+      const result = await response.json();
+      
+      if (response.ok) {
+        console.log(`${result.addedCount}件の写真をアルバムに追加しました`);
+        setSelectionMode(false);
+        setSelectedItems([]);
+        setShowAddToAlbum(false);
+      } else {
+        console.error('アルバムへの追加に失敗しました:', result.error);
+      }
+    } catch (error) {
+      console.error('アルバム追加エラー:', error);
+    }
   };
 
   const handleBatchDelete = async () => {
@@ -105,13 +150,22 @@ export default function LibraryScreen({ refreshTrigger, onRefresh }: LibraryScre
                   <span>全選択</span>
                 </button>
                 {selectedItems.length > 0 && (
-                  <button
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="px-3 py-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm flex items-center space-x-1"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span>削除 ({selectedItems.length})</span>
-                  </button>
+                  <>
+                    <button
+                      onClick={handleAddToAlbum}
+                      className="px-3 py-1.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm flex items-center space-x-1"
+                    >
+                      <FolderPlus className="h-4 w-4" />
+                      <span>アルバムに追加</span>
+                    </button>
+                    <button
+                      onClick={() => setShowDeleteConfirm(true)}
+                      className="px-3 py-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm flex items-center space-x-1"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span>削除 ({selectedItems.length})</span>
+                    </button>
+                  </>
                 )}
                 <button
                   onClick={handleExitSelectionMode}
@@ -143,6 +197,43 @@ export default function LibraryScreen({ refreshTrigger, onRefresh }: LibraryScre
           onItemsLoaded={handleItemsLoaded}
         />
       </div>
+
+      {/* アルバム選択ダイアログ */}
+      {showAddToAlbum && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-700 p-6 w-full max-w-md max-h-96 overflow-auto">
+            <h3 className="text-lg font-semibold text-white mb-4">アルバムに追加</h3>
+            <p className="text-sm text-gray-400 mb-4">
+              {selectedItems.length}件の写真を追加するアルバムを選択してください
+            </p>
+            <div className="space-y-2 mb-6">
+              {albums.length === 0 ? (
+                <p className="text-gray-500 text-center py-4">アルバムがありません</p>
+              ) : (
+                albums.map((album) => (
+                  <button
+                    key={album.id}
+                    onClick={() => addToAlbum(album.id)}
+                    className="w-full p-3 bg-gray-700/50 hover:bg-blue-600/30 border border-gray-600 hover:border-blue-500 rounded-xl text-left transition-all duration-200"
+                  >
+                    <div className="text-white font-medium">{album.name}</div>
+                    {album.description && (
+                      <div className="text-gray-400 text-sm mt-1">{album.description}</div>
+                    )}
+                    <div className="text-gray-500 text-xs mt-1">{album.mediaIds?.length || 0}枚</div>
+                  </button>
+                ))
+              )}
+            </div>
+            <button
+              onClick={() => setShowAddToAlbum(false)}
+              className="w-full px-4 py-2 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-colors"
+            >
+              キャンセル
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 削除確認ダイアログ */}
       {showDeleteConfirm && (

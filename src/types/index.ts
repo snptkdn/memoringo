@@ -33,3 +33,13 @@ export interface UploadResult {
   mediaItem?: MediaItem;
   error?: string;
 }
+
+export interface Album {
+  id: string;
+  name: string;
+  description?: string;
+  coverImageId?: string;
+  mediaIds: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}

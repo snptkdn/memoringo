@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test-bedrock": "tsx scripts/test-bedrock.ts"
+    "test-bedrock": "tsx scripts/test-bedrock.ts",
+    "cleanup-metadata": "tsx scripts/cleanup-metadata.ts"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.842.0",

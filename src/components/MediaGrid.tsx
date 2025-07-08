@@ -217,6 +217,7 @@ export default function MediaGrid({
                 ? 'border-blue-500 ring-2 ring-blue-500/50 shadow-blue-500/20' 
                 : 'border-gray-700/50 hover:shadow-green-500/20 hover:scale-105'
             }`}
+            onClick={selectionMode ? () => handleItemSelection(item.id) : () => openModal(item)}
             {...longPressHandlers}
           >
           <div className="aspect-square bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center overflow-hidden rounded-xl">
@@ -238,13 +239,7 @@ export default function MediaGrid({
             
             {/* 選択モード時のチェックボックス */}
             {selectionMode && (
-              <div 
-                className="absolute top-2 left-2 z-10"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleItemSelection(item.id);
-                }}
-              >
+              <div className="absolute top-2 left-2 z-10">
                 <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
                   isSelected 
                     ? 'bg-blue-500 border-blue-500' 

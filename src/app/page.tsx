@@ -6,11 +6,14 @@ import TabNavigation, { TabType } from '../components/TabNavigation';
 import UploadScreen from '../components/screens/UploadScreen';
 import LibraryScreen from '../components/screens/LibraryScreen';
 import SearchScreen from '../components/screens/SearchScreen';
+import AlbumScreen from '../components/screens/AlbumScreen';
+import AlbumDetailScreen from '../components/screens/AlbumDetailScreen';
 import PWAInstallPrompt from '../components/PWAInstallPrompt';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>('library');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [selectedAlbumId, setSelectedAlbumId] = useState<string | null>(null);
 
   const handleUploadSuccess = () => {
     setRefreshTrigger(prev => prev + 1);
@@ -19,6 +22,15 @@ export default function Home() {
 
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
+    setSelectedAlbumId(null); // タブ変更時にアルバム詳細をリセット
+  };
+
+  const handleAlbumClick = (albumId: string) => {
+    setSelectedAlbumId(albumId);
+  };
+
+  const handleBackFromAlbumDetail = () => {
+    setSelectedAlbumId(null);
   };
 
   const renderActiveScreen = () => {
@@ -29,6 +41,15 @@ export default function Home() {
         return <LibraryScreen refreshTrigger={refreshTrigger} />;
       case 'search':
         return <SearchScreen />;
+      case 'album':
+        return selectedAlbumId ? (
+          <AlbumDetailScreen 
+            albumId={selectedAlbumId} 
+            onBack={handleBackFromAlbumDetail} 
+          />
+        ) : (
+          <AlbumScreen onAlbumClick={handleAlbumClick} />
+        );
       default:
         return <LibraryScreen refreshTrigger={refreshTrigger} />;
     }
