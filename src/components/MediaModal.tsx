@@ -252,7 +252,7 @@ export default function MediaModal({ mediaItem, isOpen, onClose, allItems = [], 
           )}
 
           <div className="flex-1 flex items-center justify-center bg-gray-50 p-2 sm:p-4 relative">
-            {currentItem.mimeType.startsWith('image/') ? (
+            {(currentItem.mimeType.startsWith('image/') || currentItem.mimeType === 'image/dng' || currentItem.mimeType === 'image/x-adobe-dng') ? (
               <img
                 src={`/api/media/file/${currentItem.filename}`}
                 alt={currentItem.originalFilename}

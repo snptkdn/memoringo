@@ -220,7 +220,7 @@ export default function MediaUpload({ onUploadSuccess, onUploadError }: MediaUpl
           type="file"
           ref={fileInputRef}
           onChange={handleFileSelect}
-          accept="image/*,video/*"
+          accept="image/*,video/*,.dng"
           multiple
           className="hidden"
           disabled={isUploading}
@@ -248,6 +248,8 @@ export default function MediaUpload({ onUploadSuccess, onUploadError }: MediaUpl
           
           <div className="text-xs text-gray-500">
             複数ファイル選択可能 • 最大20ファイル • 50MB/ファイル
+            <br />
+            対応形式: JPEG, PNG, WebP, HEIC, DNG, MP4, MOV
           </div>
         </div>
       </div>

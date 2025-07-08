@@ -221,7 +221,7 @@ export default function MediaGrid({
             {...longPressHandlers}
           >
           <div className="aspect-square bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center overflow-hidden rounded-xl">
-            {item.mimeType.startsWith('image/') ? (
+            {(item.mimeType.startsWith('image/') || item.mimeType === 'image/dng' || item.mimeType === 'image/x-adobe-dng') ? (
               <img
                 src={`/api/media/file/${item.filename}`}
                 alt={item.originalFilename}

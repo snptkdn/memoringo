@@ -20,6 +20,8 @@ export async function POST(request: NextRequest) {
       'image/png',
       'image/webp',
       'image/heic',
+      'image/dng',
+      'image/x-adobe-dng',
       'video/mp4',
       'video/webm',
       'video/mov',
@@ -32,7 +34,13 @@ export async function POST(request: NextRequest) {
       actualMimeType = 'video/mp4';
     }
 
-    if (!allowedMimeTypes.includes(file.type)) {
+    // DNGファイルの判定（拡張子ベース）
+    const fileName = file.name.toLowerCase();
+    if (fileName.endsWith('.dng')) {
+      actualMimeType = 'image/dng';
+    }
+
+    if (!allowedMimeTypes.includes(file.type) && !allowedMimeTypes.includes(actualMimeType)) {
       return NextResponse.json({ error: 'Unsupported file type' }, { status: 400 });
     }
 
