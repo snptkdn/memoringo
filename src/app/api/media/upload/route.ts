@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DIContainer } from '../../../../container/DIContainer';
 import { MediaItem } from '../../../../types';
+import { ConfigManager } from '../../../../config';
 import { v4 as uuidv4 } from 'uuid';
 import sharp from 'sharp';
 // @ts-ignore
@@ -8,6 +9,11 @@ import * as exifParser from 'exif-parser';
 
 export async function POST(request: NextRequest) {
   try {
+    // 設定を読み込み
+    const configManager = ConfigManager.getInstance();
+    await configManager.loadConfig();
+    const config = configManager.getConfig();
+    
     const formData = await request.formData();
     const file = formData.get('file') as File;
     
@@ -15,18 +21,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    const allowedMimeTypes = [
-      'image/jpeg',
-      'image/png',
-      'image/webp',
-      'image/heic',
-      'image/dng',
-      'image/x-adobe-dng',
-      'video/mp4',
-      'video/webm',
-      'video/mov',
-      'video/quicktime'
-    ];
+    const allowedMimeTypes = configManager.getAllSupportedFormats();
 
     // iPhoneの動画ファイルはMP4として扱う
     let actualMimeType = file.type;
@@ -44,8 +39,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unsupported file type' }, { status: 400 });
     }
 
-    const maxSize = 50 * 1024 * 1024; // 50MB
-    if (file.size > maxSize) {
+    if (file.size > config.maxFileSize) {
       return NextResponse.json({ error: 'File too large' }, { status: 400 });
     }
 

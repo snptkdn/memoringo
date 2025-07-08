@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
-import path from 'path';
 import { Album } from '../../../types';
-
-const ALBUMS_FILE = path.join(process.cwd(), 'data', 'albums.json');
+import { ConfigManager } from '../../../config';
 
 async function readAlbums(): Promise<Album[]> {
   try {
-    const data = await fs.readFile(ALBUMS_FILE, 'utf8');
+    const configManager = ConfigManager.getInstance();
+    await configManager.loadConfig();
+    const albumsFile = configManager.getAlbumsFilePath();
+    
+    const data = await fs.readFile(albumsFile, 'utf8');
     const albums = JSON.parse(data);
     return albums.map((album: any) => ({
       ...album,
@@ -21,7 +23,10 @@ async function readAlbums(): Promise<Album[]> {
 }
 
 async function writeAlbums(albums: Album[]): Promise<void> {
-  await fs.writeFile(ALBUMS_FILE, JSON.stringify(albums, null, 2), 'utf8');
+  const configManager = ConfigManager.getInstance();
+  await configManager.loadConfig();
+  const albumsFile = configManager.getAlbumsFilePath();
+  await fs.writeFile(albumsFile, JSON.stringify(albums, null, 2), 'utf8');
 }
 
 export async function GET() {

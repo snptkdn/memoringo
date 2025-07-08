@@ -1,9 +1,14 @@
 import { IFileStorage } from '../../interfaces/IFileStorage';
 import { promises as fs } from 'fs';
 import { join } from 'path';
+import { ConfigManager } from '../../config';
 
 export class LocalFileStorage implements IFileStorage {
-  private basePath = './data/media';
+  private async getBasePath(): Promise<string> {
+    const configManager = ConfigManager.getInstance();
+    await configManager.loadConfig();
+    return join(configManager.getDataPath(), 'media');
+  }
 
   private async ensureDirectoryExists(dirPath: string): Promise<void> {
     try {
@@ -14,7 +19,8 @@ export class LocalFileStorage implements IFileStorage {
   }
 
   async save(file: File, path: string): Promise<string> {
-    const fullPath = join(this.basePath, path);
+    const basePath = await this.getBasePath();
+    const fullPath = join(basePath, path);
     const dirPath = join(fullPath, '..');
     
     await this.ensureDirectoryExists(dirPath);
@@ -26,7 +32,8 @@ export class LocalFileStorage implements IFileStorage {
   }
 
   async delete(path: string): Promise<void> {
-    const fullPath = join(this.basePath, path);
+    const basePath = await this.getBasePath();
+    const fullPath = join(basePath, path);
     try {
       await fs.unlink(fullPath);
     } catch (error) {
@@ -39,7 +46,8 @@ export class LocalFileStorage implements IFileStorage {
   }
 
   async exists(path: string): Promise<boolean> {
-    const fullPath = join(this.basePath, path);
+    const basePath = await this.getBasePath();
+    const fullPath = join(basePath, path);
     try {
       await fs.access(fullPath);
       return true;

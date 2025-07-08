@@ -3,23 +3,31 @@ import { MediaItem, SearchQuery } from '../../types';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import { fuzzyMatch } from '../../utils/textNormalizer';
+import { ConfigManager } from '../../config';
 
 export class JsonMediaRepository implements IMediaRepository {
-  private dataFile = './data/metadata.json';
+  private async getDataFile(): Promise<string> {
+    const configManager = ConfigManager.getInstance();
+    await configManager.loadConfig();
+    return configManager.getMetadataFilePath();
+  }
 
   private async ensureDataFileExists(): Promise<void> {
     try {
-      await fs.access(this.dataFile);
+      const dataFile = await this.getDataFile();
+      await fs.access(dataFile);
     } catch {
-      const dirPath = join(this.dataFile, '..');
+      const dataFile = await this.getDataFile();
+      const dirPath = join(dataFile, '..');
       await fs.mkdir(dirPath, { recursive: true });
-      await fs.writeFile(this.dataFile, JSON.stringify([]));
+      await fs.writeFile(dataFile, JSON.stringify([]));
     }
   }
 
   private async loadData(): Promise<MediaItem[]> {
     await this.ensureDataFileExists();
-    const data = await fs.readFile(this.dataFile, 'utf-8');
+    const dataFile = await this.getDataFile();
+    const data = await fs.readFile(dataFile, 'utf-8');
     return JSON.parse(data).map((item: any) => ({
       ...item,
       createdAt: new Date(item.createdAt),
@@ -28,7 +36,8 @@ export class JsonMediaRepository implements IMediaRepository {
   }
 
   private async saveData(items: MediaItem[]): Promise<void> {
-    await fs.writeFile(this.dataFile, JSON.stringify(items, null, 2));
+    const dataFile = await this.getDataFile();
+    await fs.writeFile(dataFile, JSON.stringify(items, null, 2));
   }
 
   async save(media: MediaItem): Promise<MediaItem> {

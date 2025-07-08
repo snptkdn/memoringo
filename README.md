@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Memoringo
 
-## Getting Started
+AI搭載の写真管理アプリ
 
-First, run the development server:
+## 設定
+
+### 設定ファイル
+
+`config/app.json`で以下の設定を変更できます：
+
+```json
+{
+  "dataPath": "./data",
+  "uploadsPath": "./uploads", 
+  "maxFileSize": 52428800,
+  "maxFilesPerUpload": 20,
+  "supportedImageFormats": [
+    "image/jpeg",
+    "image/png", 
+    "image/webp",
+    "image/heic",
+    "image/dng",
+    "image/x-adobe-dng"
+  ],
+  "supportedVideoFormats": [
+    "video/mp4",
+    "video/webm", 
+    "video/mov",
+    "video/quicktime"
+  ]
+}
+```
+
+### 環境変数
+
+以下の環境変数で設定をオーバーライドできます：
+
+- `MEMORINGO_DATA_PATH`: データディレクトリのパス（デフォルト: `./data`）
+- `MEMORINGO_UPLOADS_PATH`: アップロードディレクトリのパス（デフォルト: `./uploads`）
+- `MEMORINGO_MAX_FILE_SIZE`: 最大ファイルサイズ（バイト、デフォルト: 52428800）
+
+## 開発
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 対応ファイル形式
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 画像
+- JPEG (.jpg, .jpeg)
+- PNG (.png)
+- WebP (.webp)  
+- HEIC (.heic)
+- DNG (.dng) - Adobe Digital Negative
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 動画
+- MP4 (.mp4)
+- WebM (.webm)
+- MOV (.mov)
+- QuickTime (.qt)
 
-## Learn More
+## 機能
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- 📸 写真・動画のアップロード
+- 🏷️ AI自動タグ付け
+- 🔍 検索・フィルタリング
+- 📁 アルバム管理
+- 🗑️ 一括削除
+- 📱 レスポンシブデザイン
