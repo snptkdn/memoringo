@@ -32,7 +32,6 @@ class ConfigManager {
       const configPath = path.join(process.cwd(), 'config', 'app.json');
       const configData = await fs.readFile(configPath, 'utf8');
       this.config = JSON.parse(configData);
-      return this.config!;
     } catch (error) {
       // フォールバック設定
       console.warn('設定ファイルの読み込みに失敗しました。デフォルト設定を使用します:', error);
@@ -56,8 +55,23 @@ class ConfigManager {
           'video/quicktime'
         ]
       };
-      return this.config;
     }
+
+    // 環境変数で設定をオーバーライド
+    if (process.env.MEMORINGO_DATA_PATH) {
+      this.config.dataPath = process.env.MEMORINGO_DATA_PATH;
+    }
+    if (process.env.MEMORINGO_UPLOADS_PATH) {
+      this.config.uploadsPath = process.env.MEMORINGO_UPLOADS_PATH;
+    }
+    if (process.env.MEMORINGO_MAX_FILE_SIZE) {
+      const maxFileSize = parseInt(process.env.MEMORINGO_MAX_FILE_SIZE, 10);
+      if (!isNaN(maxFileSize)) {
+        this.config.maxFileSize = maxFileSize;
+      }
+    }
+
+    return this.config;
   }
 
   getConfig(): AppConfig {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { lookup } from 'mime-types';
+import { ConfigManager } from '../../../../../config';
 
 export async function GET(
   request: NextRequest,
@@ -9,7 +10,9 @@ export async function GET(
 ) {
   try {
     const { filename } = await params;
-    const filePath = join(process.cwd(), 'data', 'media', filename);
+    const configManager = ConfigManager.getInstance();
+    await configManager.loadConfig();
+    const filePath = join(configManager.getDataPath(), 'media', filename);
     
     const file = await readFile(filePath);
     const mimeType = lookup(filename) || 'application/octet-stream';
