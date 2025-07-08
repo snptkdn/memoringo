@@ -36,7 +36,13 @@ export default function MediaGrid({
       
       let url = '/api/media/list';
       if (searchQuery) {
-        url = `/api/search?filename=${encodeURIComponent(searchQuery)}`;
+        // searchQueryが既にURLパラメータ形式の場合はそのまま使用
+        if (searchQuery.includes('=')) {
+          url = `/api/search?${searchQuery}`;
+        } else {
+          // 単純な文字列の場合はfilenameパラメータとして扱う
+          url = `/api/search?filename=${encodeURIComponent(searchQuery)}`;
+        }
       }
       
       const response = await fetch(url);

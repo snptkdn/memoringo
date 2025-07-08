@@ -57,6 +57,9 @@ export class JsonMediaRepository implements IMediaRepository {
   async search(query: SearchQuery): Promise<MediaItem[]> {
     const items = await this.loadData();
     
+    console.log('Repository search called with query:', JSON.stringify(query, null, 2));
+    console.log('Total items to search:', items.length);
+    
     return items.filter(item => {
       if (query.filename) {
         const searchTerm = query.filename;
@@ -88,7 +91,9 @@ export class JsonMediaRepository implements IMediaRepository {
       }
       
       if (query.tags && query.tags.length > 0) {
+        console.log(`Checking item ${item.id} with tags:`, item.tags, 'against query tags:', query.tags);
         const hasTag = query.tags.some(tag => item.tags.includes(tag));
+        console.log(`Item ${item.id} has matching tag:`, hasTag);
         if (!hasTag) {
           return false;
         }

@@ -31,12 +31,16 @@ export async function GET(request: NextRequest) {
       query.dateTo = new Date(dateTo);
     }
     
-    const tags = searchParams.get('tags');
-    if (tags) {
-      query.tags = tags.split(',').map(tag => tag.trim());
+    const tags = searchParams.getAll('tags');
+    if (tags.length > 0) {
+      query.tags = tags.map(tag => tag.trim()).filter(tag => tag.length > 0);
     }
     
+    console.log('Search API called with query:', JSON.stringify(query, null, 2));
+    
     const results = await searchService.search(query);
+    
+    console.log('Search results count:', results.length);
     
     return NextResponse.json({
       results,
