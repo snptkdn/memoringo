@@ -12,29 +12,12 @@ interface TagManagerProps {
 export default function TagManager({ initialTags, onTagsChange, availableTags = [] }: TagManagerProps) {
   const [tags, setTags] = useState<string[]>(initialTags);
   const [inputValue, setInputValue] = useState('');
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setTags(initialTags);
   }, [initialTags]);
 
-  useEffect(() => {
-    if (inputValue.length > 0) {
-      const filtered = availableTags.filter(tag => 
-        tag.toLowerCase().includes(inputValue.toLowerCase()) && 
-        !tags.includes(tag)
-      );
-      setFilteredSuggestions(filtered);
-      setShowSuggestions(filtered.length > 0);
-    } else {
-      // 入力が空の場合は、使われていないタグを最大10個表示
-      const unused = availableTags.filter(tag => !tags.includes(tag)).slice(0, 10);
-      setFilteredSuggestions(unused);
-      setShowSuggestions(unused.length > 0);
-    }
-  }, [inputValue, availableTags, tags]);
 
   const addTag = (tag: string) => {
     if (tag.trim() && !tags.includes(tag.trim())) {
@@ -42,7 +25,6 @@ export default function TagManager({ initialTags, onTagsChange, availableTags = 
       setTags(newTags);
       onTagsChange(newTags);
       setInputValue('');
-      setShowSuggestions(false);
     }
   };
 
@@ -55,33 +37,8 @@ export default function TagManager({ initialTags, onTagsChange, availableTags = 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (filteredSuggestions.length > 0) {
-        addTag(filteredSuggestions[0]);
-      } else {
-        addTag(inputValue);
-      }
-    } else if (e.key === 'Escape') {
-      setShowSuggestions(false);
-    } else if (e.key === 'ArrowDown' && filteredSuggestions.length > 0) {
-      e.preventDefault();
-      // キーボードナビゲーション用の実装は後で追加可能
+      addTag(inputValue);
     }
-  };
-
-  const handleFocus = () => {
-    // フォーカス時に候補を表示
-    if (availableTags.length > 0) {
-      const unused = availableTags.filter(tag => !tags.includes(tag)).slice(0, 10);
-      setFilteredSuggestions(unused);
-      setShowSuggestions(unused.length > 0);
-    }
-  };
-
-  const handleBlur = () => {
-    // 少し遅延を入れて、候補をクリックできるようにする
-    setTimeout(() => {
-      setShowSuggestions(false);
-    }, 200);
   };
 
   return (
@@ -107,51 +64,38 @@ export default function TagManager({ initialTags, onTagsChange, availableTags = 
             </button>
           </span>
         ))}
+        
+        {/* 候補タグ表示 */}
+        {availableTags.filter(tag => !tags.includes(tag)).slice(0, 6).map((suggestion, index) => (
+          <button
+            key={`suggestion-${index}`}
+            onClick={() => addTag(suggestion)}
+            className="inline-flex items-center px-3 py-1 border-2 border-dashed border-gray-300 text-gray-500 text-xs rounded-full hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 active:bg-blue-100 active:scale-95"
+          >
+            <Plus className="h-3 w-3 mr-1 opacity-60" />
+            {suggestion}
+          </button>
+        ))}
       </div>
 
       {/* タグ入力フィールド */}
-      <div className="relative">
-        <div className="flex items-center space-x-2">
-          <input
-            ref={inputRef}
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-            placeholder="新しいタグを入力..."
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            onClick={() => addTag(inputValue)}
-            disabled={!inputValue.trim()}
-            className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
-        </div>
-
-        {/* 候補表示 */}
-        {showSuggestions && filteredSuggestions.length > 0 && (
-          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
-            {inputValue.length === 0 && (
-              <div className="px-3 py-2 text-xs text-gray-500 border-b border-gray-100">
-                よく使われるタグ
-              </div>
-            )}
-            {filteredSuggestions.map((suggestion, index) => (
-              <button
-                key={index}
-                onClick={() => addTag(suggestion)}
-                className="w-full px-3 py-2 text-left text-sm hover:bg-blue-50 transition-colors flex items-center justify-between"
-              >
-                <span>{suggestion}</span>
-                <span className="text-xs text-gray-400">追加</span>
-              </button>
-            ))}
-          </div>
-        )}
+      <div className="flex items-center space-x-2">
+        <input
+          ref={inputRef}
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="新しいタグを入力..."
+          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button
+          onClick={() => addTag(inputValue)}
+          disabled={!inputValue.trim()}
+          className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
       </div>
     </div>
   );
