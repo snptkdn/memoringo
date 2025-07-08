@@ -1,0 +1,1 @@
+export { BedrockImageAnalysisService } from './BedrockImageAnalysisService';
